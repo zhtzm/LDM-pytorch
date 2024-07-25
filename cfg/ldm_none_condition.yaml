@@ -1,0 +1,33 @@
+models:
+  LDM:
+    conditioning_key: None
+    ddpm_config:
+      beta: [0.00085, 0.012]
+      t_max: 500
+      channel: 4
+      size: 32
+      clip_denoised: True
+      sample_img_every_t: 100
+      loss_type: l1
+      unet_config:
+        t_max: 500
+        init_channels: 4
+        base_channels: 128
+        channel_mults: [1, 2, 4, 4]
+        use_attention: [2]
+        num_res_blocks: 2
+        num_groups: 32
+        dropout: 0.1
+        time_emb_scale: 1.0
+        use_t_emb: True
+  VAE:
+    embed_dim: 4
+    coder_config:
+      init_channels: 3
+      base_channels: 32
+      final_channels: 4
+      channel_mults: [1, 2, 2]
+      use_attention: []
+      num_res_blocks: 1
+      num_groups: 32
+      dropout: 0.1
