@@ -12,7 +12,7 @@ from ldm.vae import VAE
 
 if __name__ == '__main__':
     transform = transforms.Compose([
-        transforms.Resize((128, 128)),
+        transforms.Resize((256, 256)),
         transforms.ToTensor()
     ])
     dataset = ImageDataset(image_dir="E:\\datasets\\animefaces-konachan", transform=transform)
@@ -26,7 +26,7 @@ if __name__ == '__main__':
     coder_config = {'init_channels': 3,
                     'base_channels': 32,
                     'final_channels': 4,
-                    'channel_mults': [1, 2, 4],
+                    'channel_mults': [1, 2, 2, 4],
                     'use_attention': [],
                     'num_res_blocks': 2,
                     'num_groups': 32,
@@ -35,9 +35,9 @@ if __name__ == '__main__':
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     model = VAE(coder_config, embed_dim).to(device)
-    optimizer = optim.Adam(model.parameters(), lr=0.00005)
+    optimizer = optim.Adam(model.parameters(), lr=0.0001)
 
-    epochs = 400
+    epochs = 300
 
     losses = {}
     best_test_loss = float('inf')
@@ -50,8 +50,8 @@ if __name__ == '__main__':
         train_loader_tqdm = tqdm(train_loader, desc=f"Epoch {epoch} - Training")
         for x in train_loader_tqdm:
             x = x.to(device)
-            dec, posterior = model(x)
-            loss = torch.nn.functional.l1_loss(dec, x)
+            recon, mean, log_var = model(x)
+            loss = model.loss_function(x, recon, mean, log_var)
 
             acc_train_loss += loss.item()
             optimizer.zero_grad()
@@ -70,8 +70,8 @@ if __name__ == '__main__':
         with torch.no_grad():
             for data in test_loader_tqdm:
                 inputs = data.to(device)
-                dec, posterior = model(inputs)
-                loss = torch.nn.functional.l1_loss(inputs, dec)
+                recon, mean, log_var = model(inputs)
+                loss = model.loss_function(inputs, recon, mean, log_var)
                 test_loss += loss.item()
 
                 test_loader_tqdm.set_postfix(loss=loss.item())
@@ -88,11 +88,11 @@ if __name__ == '__main__':
                 'optimizer_state_dict': optimizer.state_dict()
             }
 
-            torch.save(checkpoint, os.path.join('runs/size128/VAE', f'ckpt_{epoch}.pth'))
+            torch.save(checkpoint, os.path.join('runs/size256/VAE', f'ckpt_{epoch}.pth'))
 
             if test_loss < best_test_loss:
                 best_test_loss = test_loss
-                torch.save(checkpoint, os.path.join('runs/size128/VAE', 'best_ckpt.pth'))
+                torch.save(checkpoint, os.path.join('runs/size256/VAE', 'best_ckpt.pth'))
 
         losses[epoch] = epoch_loss
 
@@ -103,7 +103,7 @@ if __name__ == '__main__':
         'model_state_dict': model.state_dict(),
         'optimizer_state_dict': optimizer.state_dict()
     }
-    torch.save(checkpoint, os.path.join('runs/size128/VAE', 'final.pth'))
+    torch.save(checkpoint, os.path.join('runs/size256/VAE', 'final.pth'))
 
     # 提取训练和测试损失
     train_losses = [loss['train'] for epoch, loss in losses.items()]
@@ -129,5 +129,5 @@ if __name__ == '__main__':
     plt.grid(True)
 
     # 显示图形
-    plt.show()
-
+    # plt.show()
+    plt.savefig(os.path.join('runs/size256/VAE', 'loss_over_epochs.png'))

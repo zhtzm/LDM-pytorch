@@ -26,8 +26,16 @@ models:
       init_channels: 3
       base_channels: 32
       final_channels: 4
-      channel_mults: [1, 2, 2]
+      channel_mults: [1, 2, 4, 4]
       use_attention: []
-      num_res_blocks: 1
+      num_res_blocks: 2
       num_groups: 32
       dropout: 0.1
+image:
+  image_size: 256
+  image_channels: 3
+dataset:
+  data_dir: E:\datasets\animefaces-konachan
+  batch_size: 32
+  train_radio: 0.8
+training:

@@ -13,7 +13,7 @@ def disabled_train(self, mode=True):
 
 if __name__ == '__main__':
     transform = transforms.Compose([
-        transforms.Resize((128, 128)),
+        transforms.Resize((256, 256)),
         transforms.ToTensor()
     ])
 
@@ -23,13 +23,13 @@ if __name__ == '__main__':
     coder_config = {'init_channels': 3,
                     'base_channels': 32,
                     'final_channels': 4,
-                    'channel_mults': [1, 2, 2],
+                    'channel_mults': [1, 2, 4, 4],
                     'use_attention': [],
-                    'num_res_blocks': 1,
+                    'num_res_blocks': 2,
                     'num_groups': 32,
                     'dropout': 0.1}
 
-    pre_ae = torch.load("runs/VAE/final_model.pth")
+    pre_ae = torch.load("runs/ckpt_130.pth")
     vae = VAE(coder_config, embed_dim).to(device)
     vae.load_state_dict(pre_ae['model_state_dict'])
     vae = vae.eval()
@@ -37,7 +37,7 @@ if __name__ == '__main__':
     for param in vae.parameters():
         param.requires_grad = False
 
-    img = Image.open('E:\\datasets\\animefaces-konachan\\000002-01.jpg').convert("RGB")
+    img = Image.open('E:\\datasets\\animefaces-konachan\\000015-01.jpg').convert("RGB")
     img = transform(img)
 
     image = img.cpu().permute(1, 2, 0).numpy()  # 将CHW格式转换为HWC，并转换为numpy数组
@@ -46,7 +46,7 @@ if __name__ == '__main__':
     plt.axis('off')  # 不显示坐标轴
     plt.show()
 
-    x = img.reshape(1, 3, 128, 128)
+    x = img.reshape(1, 3, 256, 256)
     x, _ = vae(x.to(device))
 
     x = x[0]

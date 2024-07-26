@@ -54,7 +54,6 @@ class DDPM(nn.Module):
         self.register_buffer('cumprod_alphas_prev', to_torch(cumprod_alphas_prev))
 
         # the m1 in the symbol below represents the subtraction of one
-        # the e2 in the symbol below represents the square
 
         # sqrt_cumprod_alphas and sqrt_one_minus_cumprod_alphas are used to compute x_t
         # x_t = sqrt_cumprod_alphas[t] * x_0 + sqrt_one_minus_cumprod_alphas[t] * epsilon(a sample of N(0, I))
@@ -67,14 +66,14 @@ class DDPM(nn.Module):
         # x_0 = sqrt_recip_cumprod_alphas[t] * x_t + sqrt_recip_cumprod_alphas_m1[t] * epsilon(training by unet)
         self.register_buffer('sqrt_recip_cumprod_alphas', to_torch(np.sqrt(1. / cumprod_alphas)))
         self.register_buffer('sqrt_recip_cumprod_alphas_m1', to_torch(np.sqrt(1. / cumprod_alphas - 1)))
-        # posterior_variance_e2 in calculating the square of the variance
-        posterior_variance_e2 = betas * (1. - cumprod_alphas_prev) / (1. - cumprod_alphas)
-        self.register_buffer("posterior_variance_e2", to_torch(
-            posterior_variance_e2
+        # posterior_variance in calculating the square of the variance
+        posterior_variance = betas * (1. - cumprod_alphas_prev) / (1. - cumprod_alphas)
+        self.register_buffer("posterior_variance", to_torch(
+            posterior_variance
         ))
         # convert to log format for easy calculation and avoid being all positive, here I have set up the Nether
-        self.register_buffer("posterior_log_variance_e2_clipped", to_torch(
-            np.log(np.maximum(posterior_variance_e2, 1e-20))
+        self.register_buffer("posterior_log_variance_clipped", to_torch(
+            np.log(np.maximum(posterior_variance, 1e-20))
         ))
         # mean = posterior_mean_n0[t] * x_0 + posterior_mean_nt[t] * x_t
         # the parameter used to calculate the mean
@@ -136,12 +135,12 @@ class DDPM(nn.Module):
                 self._extract(self.posterior_mean_n0, t, x_t.shape) * x_0 +
                 self._extract(self.posterior_mean_nt, t, x_t.shape) * x_t
         )
-        posterior_log_variance_e2 = self._extract(self.posterior_log_variance_e2_clipped, t, x_t.shape)
-        posterior_variance = (0.5 * posterior_log_variance_e2).exp()
+        posterior_log_variance = self._extract(self.posterior_log_variance_clipped, t, x_t.shape)
+        posterior_standard_deviation = (0.5 * posterior_log_variance).exp()
 
         noise = torch.randn_like(x_t, device=device)
         nonzero_mask = torch.Tensor(t != 0).reshape(b, 1, 1, 1)
-        return posterior_mean + nonzero_mask * posterior_variance * noise
+        return posterior_mean + nonzero_mask * posterior_standard_deviation * noise
 
     @torch.no_grad()
     def denoising_loop(self, shape: tuple, return_intermediates: bool):
