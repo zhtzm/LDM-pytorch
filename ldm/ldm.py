@@ -3,22 +3,46 @@ from torch import nn
 from tqdm import tqdm
 
 from ldm.ddpm import DDPM
+from utils import import_class_from_string, disable_train_mode, load_checkpoint
 
 
 class LDM(DDPM):
     def __init__(self,
-                 ae_model: nn.Module,
-                 condition_model: nn.Module,
+                 ae_model: dict,
+                 condition_model: dict,
                  ddpm_config: dict,
                  conditioning_key: str
                  ):
         super(LDM, self).__init__(**ddpm_config)
         assert ae_model is not None
-        self.ae_model = ae_model
-        self.condition_model = condition_model
+        self.ae_model = self.init_ae_model(ae_model)
+        self.condition_model = self.init_condition_model(condition_model)
 
-        self.wrapper.conditioning_key = conditioning_key if not conditioning_key == "None" else None
+        self.wrapper.conditioning_key = conditioning_key
         self.wrapper.assert_conditioning_key()
+
+    @staticmethod
+    def initialize_condition_model(model_cfg):
+        if model_cfg['target']:
+            condition_model_class = import_class_from_string(model_cfg['target'])
+            condition_model = condition_model_class(**model_cfg['params'])
+            if model_cfg['ckpt_file']:
+                condition_model, _ = load_checkpoint(model_cfg['ckpt_file'], condition_model)
+                return disable_train_mode(condition_model)
+            return condition_model
+        return None
+
+    @staticmethod
+    def initialize_ae_model(model_cfg):
+        if model_cfg['target']:
+            ae_model_class = import_class_from_string(model_cfg['target'])
+            ae_model = ae_model_class(**model_cfg['params'])
+            disable_train_mode(ae_model)
+            if model_cfg['ckpt_file']:
+                ae_model, _ = load_checkpoint(model_cfg['ckpt_file'], ae_model)
+                return disable_train_mode(ae_model)
+            return ae_model
+        return None
 
     def losses(self, x: torch.Tensor, condition: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
         noise = torch.randn_like(x)

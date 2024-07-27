@@ -1,18 +1,46 @@
+import importlib
 import os
-
 import torch
+import yaml
+from torch import nn
 from torch.utils.data import random_split, DataLoader
+from torchvision import transforms
 
-from datasets.image_dataset import ImageDataset
+from ldm.modules.ema import EMA
 
 
-def initialize_model(model_class, model_config: dict, device: torch.device):
-    model = model_class(**model_config).to(device)
+def parse_yaml_config(config_path: str):
+    try:
+        with open(config_path, 'r', encoding='utf-8') as file:
+            config = yaml.safe_load(file)
+            return config['models'], config['images'], config['dataset'], config['train']
+    except FileNotFoundError:
+        raise IOError(f"Configuration file {config_path} does not exist")
+    except yaml.YAMLError as e:
+        raise ValueError(f"Error parsing configuration file {config_path}: {e}")
+
+
+def import_class_from_string(class_string: str):
+    module_name, class_name = class_string.rsplit('.', 1)
+    try:
+        module = importlib.import_module(module_name)
+        return getattr(module, class_name)
+    except ImportError as e:
+        raise ImportError(f"Could not import {class_string}. Reason: {e}")
+    except AttributeError:
+        raise AttributeError(f"Class {class_name} not found in module {module_name}.")
+
+
+def disable_train_mode(model: nn.Module):
+    model.eval()
+    model.train = model.eval
+    for param in model.parameters():
+        param.requires_grad = False
     return model
 
 
-def load_datasets(data_dir, transform, split_ratio=0.8, batch_size=32):
-    dataset = ImageDataset(data_dir, transform=transform)
+def load_datasets(transform, dataset_class, data_dir, split_ratio=0.8, batch_size=32):
+    dataset = dataset_class(data_dir, transform=transform)
     train_size = int(split_ratio * len(dataset))
     test_size = len(dataset) - train_size
     train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
@@ -21,20 +49,8 @@ def load_datasets(data_dir, transform, split_ratio=0.8, batch_size=32):
     return train_loader, test_loader
 
 
-def _generate_unique_filepath(base_path, state='train'):
-    number = 0
-    while True:
-        run_path = f"{state}_{number}"
-        run_path = os.path.join(base_path, run_path)
-        if not os.path.exists(run_path):
-            os.makedirs(run_path)
-            return run_path
-        number += 1
-
-
 def save_checkpoint(state, is_best, checkpoint_dir, filename='checkpoint.pth'):
-    if not os.path.exists(checkpoint_dir):
-        os.makedirs(checkpoint_dir)
+    os.makedirs(checkpoint_dir, exist_ok=True)
     torch.save(state, os.path.join(checkpoint_dir, filename))
     if is_best:
         torch.save(state, os.path.join(checkpoint_dir, 'best_checkpoint.pth'))
@@ -46,3 +62,33 @@ def load_checkpoint(checkpoint_path, model, optimizer=None):
     if optimizer:
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     return model, optimizer
+
+
+def initialize_main_model(model_cfg):
+    main_model_class = import_class_from_string(model_cfg['main_model']['target'])
+    return main_model_class(**model_cfg['main_model']['params'])
+
+
+def train_util(config_path: str):
+    model_cfg, image_cfg, dataset_cfg, train_cfg = parse_yaml_config(config_path)
+
+    main_model = initialize_main_model(model_cfg)
+
+    dataset_class = import_class_from_string(dataset_cfg['dataset']['target'])
+    transform = transforms.Compose([
+        transforms.Resize((image_cfg['image_size'], image_cfg['image_size'])),
+        transforms.ToTensor()
+    ])
+    train_loader, test_loader = load_datasets(transform=transform, dataset_class=dataset_class,
+                                              **dataset_cfg['dataset']['params'])
+
+    use_ema = train_cfg['use_ema']
+    epochs = train_cfg['epochs']
+    device = torch.device(train_cfg['device'] if torch.cuda.is_available() else 'cpu')
+    optimizer = torch.optim.Adam(main_model.parameters(), lr=train_cfg['lr'])
+
+    main_model = main_model.to(device)
+
+    ema_model = EMA(main_model) if use_ema else None
+
+    return main_model, ema_model, optimizer, train_loader, test_loader, epochs
