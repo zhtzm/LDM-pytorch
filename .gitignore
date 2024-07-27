@@ -1,3 +1,5 @@
 .idea/
 __pycache__/
 runs/
+*test.py
+test*.py
