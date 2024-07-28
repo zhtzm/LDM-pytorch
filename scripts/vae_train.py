@@ -18,7 +18,7 @@ if __name__ == '__main__':
         for x in train_loader_tqdm:
             x = x.to(device)
             recon, mean, log_var = model(x)
-            loss = model.loss_function(x, recon, mean, log_var)
+            loss, recon_loss, kl_loss = model.loss_function(x, recon, mean, log_var, sigma=64.)
 
             acc_train_loss += loss.item()
             optimizer.zero_grad()
@@ -27,7 +27,7 @@ if __name__ == '__main__':
             if ema_model is not None:
                 ema_model.update(model)
 
-            train_loader_tqdm.set_postfix(loss=loss.item())
+            train_loader_tqdm.set_postfix(loss=loss.item(), recon_loss=recon_loss.item(), kl_loss=kl_loss.item())
 
         acc_train_loss /= len(train_loader)
         epoch_loss['train'] = acc_train_loss
@@ -40,10 +40,10 @@ if __name__ == '__main__':
             for data in test_loader_tqdm:
                 inputs = data.to(device)
                 recon, mean, log_var = model(inputs)
-                loss = model.loss_function(inputs, recon, mean, log_var)
+                loss, recon_loss, kl_loss = model.loss_function(inputs, recon, mean, log_var, sigma=64.)
                 test_loss += loss.item()
 
-                test_loader_tqdm.set_postfix(loss=loss.item())
+                test_loader_tqdm.set_postfix(loss=loss.item(), recon_loss=recon_loss.item(), kl_loss=kl_loss.item())
 
         test_loss /= len(test_loader)
         epoch_loss['test'] = acc_train_loss
