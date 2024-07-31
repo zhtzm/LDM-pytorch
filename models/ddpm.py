@@ -6,7 +6,7 @@ from torch import nn
 from tqdm import tqdm
 import torch.nn.functional as F
 
-from ldm.modules.unet import UNet
+from models.modules.unet import UNet
 
 
 class DDPM(nn.Module):

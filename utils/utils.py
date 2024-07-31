@@ -7,7 +7,7 @@ from torch import nn
 from torch.utils.data import random_split, DataLoader
 from torchvision import transforms
 
-from ldm.modules.ema import EMA
+from models.modules.ema import EMA
 
 
 def parse_yaml_config(config_path: str):

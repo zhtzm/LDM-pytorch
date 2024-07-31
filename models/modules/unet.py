@@ -1,9 +1,9 @@
 import torch
 from torch import nn
 
-from ldm.modules.residual import ResidualBlock
-from ldm.modules.sampler import DownSample, UpSample
-from ldm.modules.embbeder import TimeEmbedding
+from models.modules.residual import ResidualBlock
+from models.modules.sampler import DownSample, UpSample
+from models.modules.embbeder import TimeEmbedding
 
 
 class UNet(nn.Module):

@@ -1,10 +1,10 @@
 import torch
 from tqdm import tqdm
 
-from utils import train_util, save_checkpoint, draw_loss
+from utils.utils import train_util, save_checkpoint, draw_loss
 
 if __name__ == '__main__':
-    model, ema_model, optimizer, train_loader, test_loader, epochs, run_path, device = train_util("cfg/vae_s256.yaml")
+    model, ema_model, optimizer, train_loader, test_loader, epochs, run_path, device = train_util("cfg/vae_s256_32x32x4.yaml")
 
     losses = {}
     best_test_loss = float('inf')

@@ -1,15 +1,15 @@
 models:
   main_model:
-    target: ldm.vae.VAE
+    target: models.vae.VAE
     params:
-      embed_dim: 16
+      embed_dim: 4
       coder_config:
         init_channels: 3
         base_channels: 32
-        final_channels: 16
-        channel_mults: [1, 2, 2, 4]
+        final_channels: 4
+        channel_mults: [1, 2, 4, 8]
         use_attention: []
-        num_res_blocks: 3
+        num_res_blocks: 2
         num_groups: 32
         dropout: 0.1
 images:
@@ -25,5 +25,5 @@ train:
   use_ema: False
   device: cuda:0
   epochs: 200
-  lr: 4.5e-6
+  lr: 0.0001
   base_path: runs

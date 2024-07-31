@@ -1,8 +1,8 @@
 from torch import nn
 
-from ldm.modules.residual import ResidualBlock
-from ldm.modules.sampler import DownSample, UpSample
-from ldm.modules.swish import Swish
+from models.modules.residual import ResidualBlock
+from models.modules.sampler import DownSample, UpSample
+from models.modules.swish import Swish
 
 
 class Encoder(nn.Module):

@@ -1,7 +1,7 @@
 from torch import nn
 from torch.nn import init
 
-from ldm.modules.attn import AttentionBlock
+from models.modules.attn import AttentionBlock
 
 
 class ResidualBlock(nn.Module):

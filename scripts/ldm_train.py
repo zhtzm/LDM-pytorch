@@ -1,7 +1,7 @@
 import torch
 from tqdm import tqdm
 
-from utils import train_util, save_checkpoint, draw_loss
+from utils.utils import train_util, save_checkpoint, draw_loss
 
 if __name__ == '__main__':
     model, ema_model, optimizer, train_loader, test_loader, epochs, run_path, device = \
