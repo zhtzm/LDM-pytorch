@@ -5,7 +5,7 @@ from utils.utils import train_util, save_checkpoint, draw_loss
 
 if __name__ == '__main__':
     model, ema_model, optimizer, train_loader, test_loader, epochs, run_path, device = \
-        train_util("cfg/ldm_s256_nc.yaml")
+        train_util("cfg/ldm_s256_32x32x4_nc.yaml")
 
     losses = {}
     best_test_loss = float('inf')
