@@ -14,8 +14,8 @@ class LDM(DDPM):
                  ):
         super(LDM, self).__init__(**ddpm_config)
         assert ae_model is not None
-        self.ae_model = self.init_ae_model(ae_model)
-        self.condition_model = self.init_condition_model(condition_model)
+        self.ae_model = self.initialize_ae_model(ae_model)
+        self.condition_model = self.initialize_condition_model(condition_model)
 
         self.wrapper.conditioning_key = conditioning_key
         self.wrapper.assert_conditioning_key()
@@ -23,7 +23,7 @@ class LDM(DDPM):
     @staticmethod
     def initialize_condition_model(model_cfg):
         if model_cfg['target']:
-            condition_model_class = import_class_from_string(model_cfg['target'])
+            condition_model_class, _ = import_class_from_string(model_cfg['target'])
             condition_model = condition_model_class(**model_cfg['params'])
             if model_cfg['ckpt_file']:
                 condition_model, _ = load_checkpoint(model_cfg['ckpt_file'], condition_model)
@@ -34,9 +34,8 @@ class LDM(DDPM):
     @staticmethod
     def initialize_ae_model(model_cfg):
         if model_cfg['target']:
-            ae_model_class = import_class_from_string(model_cfg['target'])
+            ae_model_class, _ = import_class_from_string(model_cfg['target'])
             ae_model = ae_model_class(**model_cfg['params'])
-            disable_train_mode(ae_model)
             if model_cfg['ckpt_file']:
                 ae_model, _ = load_checkpoint(model_cfg['ckpt_file'], ae_model)
                 return disable_train_mode(ae_model)
@@ -52,8 +51,8 @@ class LDM(DDPM):
 
     def forward(self, x: torch.Tensor, condition: list = None) -> torch.Tensor:
         assert x.dim() == 4
-        posterior = self.ae_model.encode(x)
-        x = posterior.sample()
+        mean, log_var = self.ae_model.encode(x)
+        x = self.ae_model.reparameterization(mean, log_var)
         assert x.shape[-3:] == (self.channel, *self.size)
         if self.wrapper.conditioning_key is not None:
             assert condition is not None

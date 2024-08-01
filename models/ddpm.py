@@ -96,9 +96,9 @@ class DDPM(nn.Module):
 
     def get_loss(self, noise: torch.Tensor, model_out: torch.Tensor) -> torch.Tensor:
         if self.loss_type == 'l1':
-            loss = F.l1_loss(model_out, noise)
+            loss = F.l1_loss(model_out, noise, reduction='sum')
         elif self.loss_type == 'l2':
-            loss = F.mse_loss(model_out, noise)
+            loss = F.mse_loss(model_out, noise, reduction='sum')
         else:
             raise NotImplementedError("unknown loss type '{loss_type}'")
 

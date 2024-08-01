@@ -10,7 +10,7 @@ if __name__ == '__main__':
     set_default_workpath(os.path.dirname, os.getcwd())
 
     model, ema_model, optimizer, train_loader, test_loader, epochs, run_path, device = \
-        train_util("cfg/ldm_s256_32x32x4_nc.yaml")
+        train_util("cfg/ldm_32x32x4_8x8_nc.yaml")
 
     losses = {}
     best_test_loss = float('inf')

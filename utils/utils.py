@@ -35,7 +35,6 @@ def import_class_from_string(class_string: str):
 
 def disable_train_mode(model: nn.Module):
     model.eval()
-    model.train = model.eval
     for param in model.parameters():
         param.requires_grad = False
     return model
@@ -53,7 +52,7 @@ def load_datasets(transform, dataset_class, data_dir, train_ratio=0.8, batch_siz
 
 def save_checkpoint(state, is_best, checkpoint_dir, filename='checkpoint.pth'):
     if is_best:
-        torch.save(state, os.path.join(checkpoint_dir, 'best_checkpoint.pth'))
+        torch.save(state, os.path.join(checkpoint_dir, 'vae_s256_32x32x4.pth'))
     else:
         torch.save(state, os.path.join(checkpoint_dir, filename))
 

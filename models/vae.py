@@ -52,3 +52,8 @@ class VAE(nn.Module):
         kl_loss = 0.5 * torch.sum(-1 - log_var + torch.pow(mean, 2) + torch.exp(log_var))
         loss = recon_loss + kl_loss
         return loss, recon_loss, kl_loss
+
+    def loss_forward(self, x: torch.Tensor):
+        recon, mean, log_var = self.forward(x)
+        loss, recon_loss, kl_loss = self.loss_function(x, recon, mean, log_var)[0]
+        return {'0_loss': loss, '1_recon_loss': recon_loss, '2_kl_loss': kl_loss}
