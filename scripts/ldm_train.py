@@ -1,9 +1,14 @@
+import os
+
 import torch
 from tqdm import tqdm
 
+from utils.path_utils import set_default_workpath
 from utils.utils import train_util, save_checkpoint, draw_loss
 
 if __name__ == '__main__':
+    set_default_workpath(os.path.dirname, os.getcwd())
+
     model, ema_model, optimizer, train_loader, test_loader, epochs, run_path, device = \
         train_util("cfg/ldm_s256_32x32x4_nc.yaml")
 
@@ -63,4 +68,4 @@ if __name__ == '__main__':
 
         losses[epoch] = epoch_loss
 
-    draw_loss()
+    draw_loss(losses=losses, run_path=run_path)

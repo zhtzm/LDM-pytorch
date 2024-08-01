@@ -8,6 +8,7 @@ from torch.utils.data import random_split, DataLoader
 from torchvision import transforms
 
 from models.ema import EMA
+from utils.path_utils import generate_unique_filepath
 
 
 def parse_yaml_config(config_path: str):
@@ -38,17 +39,6 @@ def disable_train_mode(model: nn.Module):
     for param in model.parameters():
         param.requires_grad = False
     return model
-
-
-def generate_unique_filepath(base_path, class_name, state='train'):
-    number = 0
-    while True:
-        run_path = f"{class_name}_{state}_{number}"
-        run_path = os.path.join(base_path, run_path)
-        if not os.path.exists(run_path):
-            os.makedirs(run_path)
-            return run_path
-        number += 1
 
 
 def load_datasets(transform, dataset_class, data_dir, train_ratio=0.8, batch_size=32):
