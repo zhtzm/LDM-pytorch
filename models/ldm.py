@@ -73,7 +73,7 @@ class LDM(DDPM):
                 self._extract(self.posterior_mean_n0, t, x_t.shape) * x_0 +
                 self._extract(self.posterior_mean_nt, t, x_t.shape) * x_t
         )
-        posterior_log_variance_v2 = self._extract(self.posterior_log_variance_e2_clipped, t, x_t.shape)
+        posterior_log_variance_v2 = self._extract(self.posterior_log_variance_clipped, t, x_t.shape)
         posterior_variance = (0.5 * posterior_log_variance_v2).exp()
 
         noise = torch.randn_like(x_t, device=device)

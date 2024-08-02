@@ -52,7 +52,7 @@ def load_datasets(transform, dataset_class, data_dir, train_ratio=0.8, batch_siz
 
 def save_checkpoint(state, is_best, checkpoint_dir, filename='checkpoint.pth'):
     if is_best:
-        torch.save(state, os.path.join(checkpoint_dir, 'vae_s256_32x32x4.pth'))
+        torch.save(state, os.path.join(checkpoint_dir, 'best_checkpoint.pth'))
     else:
         torch.save(state, os.path.join(checkpoint_dir, filename))
 
