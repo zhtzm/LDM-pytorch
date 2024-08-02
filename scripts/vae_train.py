@@ -52,7 +52,7 @@ if __name__ == '__main__':
                 test_loader_tqdm.set_postfix(loss=loss.item(), recon_loss=recon_loss.item(), kl_loss=kl_loss.item())
 
         test_loss /= len(test_loader)
-        epoch_loss['test'] = acc_train_loss
+        epoch_loss['test'] = test_loss
 
         if epoch % 10 == 0 or epoch == epochs:
             state = {
