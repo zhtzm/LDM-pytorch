@@ -46,14 +46,16 @@ class VAE(nn.Module):
     def loss_function(x: torch.Tensor,
                       recon: torch.Tensor,
                       mean: torch.Tensor,
-                      log_var: torch.Tensor
+                      log_var: torch.Tensor,
+                      kl_weight: float
                       ) -> torch.Tensor:
-        recon_loss = torch.nn.functional.mse_loss(recon, x, reduction='sum')
-        kl_loss = 0.5 * torch.sum(-1 - log_var + torch.pow(mean, 2) + torch.exp(log_var))
-        loss = recon_loss + kl_loss
-        return loss, recon_loss, kl_loss
+        recon_loss = torch.nn.functional.mse_loss(recon, x)
+        kl_loss = torch.mean(
+            -0.5 * torch.sum(1 + log_var - torch.pow(mean, 2) - torch.exp(log_var), 1), 0)
+        loss = recon_loss + kl_loss * kl_weight
+        return loss
 
     def loss_forward(self, x: torch.Tensor):
         recon, mean, log_var = self.forward(x)
-        loss, recon_loss, kl_loss = self.loss_function(x, recon, mean, log_var)[0]
-        return {'0_loss': loss, '1_recon_loss': recon_loss, '2_kl_loss': kl_loss}
+        loss = self.loss_function(x, recon, mean, log_var)[0]
+        return loss
