@@ -50,8 +50,7 @@ class VAE(nn.Module):
                       kl_weight: float
                       ) -> torch.Tensor:
         recon_loss = torch.nn.functional.mse_loss(recon, x)
-        kl_loss = torch.mean(
-            -0.5 * torch.sum(1 + log_var - torch.pow(mean, 2) - torch.exp(log_var), 1), 0)
+        kl_loss = torch.mean(-0.5 * torch.sum(1 + log_var - mean ** 2 - log_var.exp(), dim=1), dim=0)
         loss = recon_loss + kl_loss * kl_weight
         return loss
 

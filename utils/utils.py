@@ -7,7 +7,7 @@ from torch import nn
 from torch.utils.data import random_split, DataLoader
 from torchvision import transforms
 
-from models.ema import EMA
+from models.modules.ema import EMA
 from utils.path_utils import generate_unique_filepath
 
 
@@ -95,6 +95,22 @@ def train_util(config_path: str):
     ema_model = EMA(main_model) if use_ema else None
 
     return main_model, ema_model, optimizer, train_loader, test_loader, epochs, run_path, device
+
+
+def test_util(config_path: str, checkpoint_path: str):
+    model_cfg, image_cfg, dataset_cfg, train_cfg = parse_yaml_config(config_path)
+
+    main_model, class_name = initialize_main_model(model_cfg)
+
+    ckpt = torch.load(checkpoint_path)
+    main_model.load_state_dict(ckpt['model_state_dict'])
+    main_model = main_model.eval()
+
+    device = torch.device(train_cfg['device'] if torch.cuda.is_available() else 'cpu')
+    base_path = train_cfg['base_path']
+    run_path = generate_unique_filepath(base_path=base_path, class_name=class_name, state='test')
+
+    return main_model, run_path, device
 
 
 def draw_loss(losses: dict, run_path: str):
