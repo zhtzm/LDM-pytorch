@@ -1,6 +1,6 @@
 models:
   main_model:
-    target: models.ldm.LDM
+    target: models.diffusion.ldm.LDM
     params:
       conditioning_key: null
       ddpm_config:
@@ -23,7 +23,7 @@ models:
           time_emb_scale: 1.0
           use_t_emb: True
       ae_model:
-        target: models.vae.VAE
+        target: models.vae.vae.VAE
         ckpt_file: ckpt\vae_s256_32x32x4.pth
         params:
           embed_dim: 4

@@ -1,6 +1,6 @@
 models:
   main_model:
-    target: models.vae.VAE
+    target: models.vae.vae.VAE
     params:
       embed_dim: 4
       coder_config:
