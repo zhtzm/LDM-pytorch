@@ -1,7 +1,6 @@
 import numpy as np
 import torch
 from torch import nn
-from torch.nn import init
 
 
 class TimeEmbedding(nn.Module):
@@ -45,12 +44,6 @@ class TimeEmbedding(nn.Module):
         emb = emb.reshape(t_max, emb_dim).astype(np.float32)
 
         return torch.from_numpy(emb)
-
-    def initialize(self):
-        for module in self.modules():
-            if isinstance(module, nn.Linear):
-                init.xavier_uniform_(module.weight)
-                init.zeros_(module.bias)
 
     def forward(self, t: int) -> torch.Tensor:
         return self.module_list(self.t_emb[t])

@@ -2,18 +2,18 @@ models:
   main_model:
     target: models.vae.vae.VAE
     params:
-      embed_dim: 4
+      embed_dim: 16
       coder_config:
         init_channels: 3
-        base_channels: 32
-        final_channels: 4
-        channel_mults: [1, 2, 4, 8]
-        use_attention: []
+        base_channels: 64
+        final_channels: 16
+        channel_mults: [1, 2, 4]
+        use_attention: [2]
         num_res_blocks: 2
         num_groups: 32
         dropout: 0.1
 images:
-  image_size: 256
+  image_size: 64
   image_channels: 3
 dataset:
   target: datasets.image_dataset.ImageDataset

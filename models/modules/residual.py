@@ -1,5 +1,4 @@
 from torch import nn
-from torch.nn import init
 
 from models.modules.Conv import GNSiLUConv2D
 from models.modules.attn import AttentionBlock
@@ -29,14 +28,6 @@ class ResidualBlock(nn.Module):
             if in_channels != out_channels else nn.Identity()
 
         self.attention = nn.Identity() if not use_attention else AttentionBlock(out_channels, dropout, num_groups)
-
-        self.initialize()
-
-    def initialize(self):
-        for module in self.modules():
-            if isinstance(module, (nn.Conv2d, nn.Linear)):
-                init.xavier_uniform_(module.weight)
-                init.zeros_(module.bias)
 
     def forward(self, x, time_emb=None):
         out = self.block1(x)

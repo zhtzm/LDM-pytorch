@@ -10,7 +10,7 @@ if __name__ == '__main__':
     set_default_workpath(os.path.dirname, os.getcwd())
 
     model, ema_model, optimizer, train_loader, test_loader, epochs, run_path, device = (
-        train_util("cfg/vae_s256_32x32x4.yaml"))
+        train_util("cfg/vae_s64_16x16x16.yaml"))
 
     losses = {}
     best_test_loss = float('inf')
@@ -24,7 +24,7 @@ if __name__ == '__main__':
         for x in train_loader_tqdm:
             x = x.to(device)
             recon, mean, log_var = model(x)
-            losss = model.loss_function(x, recon, mean, log_var, kl_weight=1.0)
+            loss = model.loss_function(x, recon, mean, log_var, kl_weight=0.5)
 
             acc_train_loss += loss.item()
             optimizer.zero_grad()
@@ -46,7 +46,7 @@ if __name__ == '__main__':
             for data in test_loader_tqdm:
                 inputs = data.to(device)
                 recon, mean, log_var = model(inputs)
-                loss = model.loss_function(inputs, recon, mean, log_var, kl_weight=1.0)
+                loss = model.loss_function(inputs, recon, mean, log_var, kl_weight=0.005)
                 test_loss += loss.item()
 
                 test_loader_tqdm.set_postfix(loss=loss.item())
