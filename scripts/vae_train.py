@@ -20,7 +20,7 @@ if __name__ == '__main__':
 
         epoch_loss = {}
 
-        train_loader_tqdm = tqdm(train_loader, desc=f"Epoch {epoch}/{epochs + 1} - Training")
+        train_loader_tqdm = tqdm(train_loader, desc=f"Epoch {epoch}/{epochs} - Training")
         for x in train_loader_tqdm:
             x = x.to(device)
             recon, mean, log_var = model(x)
@@ -40,7 +40,7 @@ if __name__ == '__main__':
 
         model.eval()
         test_loss = 0
-        test_loader_tqdm = tqdm(test_loader, desc=f"Epoch {epoch}/{epochs + 1} - Testing")
+        test_loader_tqdm = tqdm(test_loader, desc=f"Epoch {epoch}/{epochs} - Testing")
 
         with torch.no_grad():
             for data in test_loader_tqdm:
