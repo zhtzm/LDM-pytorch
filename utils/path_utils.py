@@ -21,4 +21,3 @@ def set_default_workpath(func, script_path):
         os.chdir(work_path)
     except FileNotFoundError:
         print(f"指定的目录 {work_path} 不存在。")
-
