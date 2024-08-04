@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 
+from models.modules.Conv import GNSiLUConv2D
 from models.modules.residual import ResidualBlock
 from models.modules.sampler import DownSample, UpSample
 from models.modules.embbeder import TimeEmbedding
@@ -23,6 +24,7 @@ class UNet(nn.Module):
         use_attention = () if use_attention is None else tuple(use_attention)
         for a in use_attention:
             assert -1 < a < len(channel_mults)
+
         t_out_dim = None
         if use_t_emb:
             t_out_dim = 4 * base_channels
@@ -98,11 +100,7 @@ class UNet(nn.Module):
 
         assert len(channels) == 0
 
-        self.tail = nn.Sequential(
-            nn.GroupNorm(num_groups, base_channels),
-            nn.SiLU(),
-            nn.Conv2d(base_channels, init_channels, kernel_size=3, padding=1)
-        )
+        self.tail = GNSiLUConv2D(now_channels, init_channels, kernel_size=3, padding=1, num_groups=num_groups)
 
     def forward(self, x, time=None):
         if self.time_embedding is not None:

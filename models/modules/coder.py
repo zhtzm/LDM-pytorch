@@ -1,8 +1,8 @@
 from torch import nn
 
+from models.modules.Conv import GNSiLUConv2D
 from models.modules.residual import ResidualBlock
 from models.modules.sampler import DownSample, UpSample
-from models.modules.swish import Swish
 
 
 class Encoder(nn.Module):
@@ -61,11 +61,7 @@ class Encoder(nn.Module):
             )
         ])
 
-        self.tail = nn.Sequential(
-            nn.GroupNorm(num_groups, now_channels),
-            Swish(),
-            nn.Conv2d(now_channels, 2 * final_channels, kernel_size=3, padding=1)
-        )
+        self.tail = GNSiLUConv2D(now_channels, 2 * final_channels, kernel_size=3, padding=1, num_groups=num_groups)
 
     def forward(self, x):
         x = self.head(x)
@@ -134,11 +130,7 @@ class Decoder(nn.Module):
             if i != 0:
                 self.ups.append(UpSample(now_channels))
 
-        self.tail = nn.Sequential(
-            nn.GroupNorm(num_groups, now_channels),
-            Swish(),
-            nn.Conv2d(now_channels, init_channels, kernel_size=3, padding=1)
-        )
+        self.tail = GNSiLUConv2D(now_channels, init_channels, kernel_size=3, padding=1, num_groups=num_groups)
 
     def forward(self, x):
         x = self.head(x)

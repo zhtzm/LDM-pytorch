@@ -1,7 +1,7 @@
 import torch
 from tqdm import tqdm
 
-from models.ddpm import DDPM
+from models.diffusion.ddpm import DDPM
 from utils.utils import import_class_from_string, disable_train_mode, load_checkpoint
 
 

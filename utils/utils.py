@@ -7,7 +7,7 @@ from torch import nn
 from torch.utils.data import random_split, DataLoader
 from torchvision import transforms
 
-from models.modules.ema import EMA
+from models.ema import EMA
 from utils.path_utils import generate_unique_filepath
 
 
