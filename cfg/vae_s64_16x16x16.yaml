@@ -12,18 +12,26 @@ models:
         num_res_blocks: 2
         num_groups: 32
         dropout: 0.1
-images:
+dataset:
   image_size: 64
   image_channels: 3
-dataset:
   target: datasets.image_dataset.ImageDataset
   params:
     data_dir: E:\datasets\animefaces-konachan
     batch_size: 32
     train_ratio: 0.8
 train:
-  use_ema: False
   device: cuda:0
   epochs: 50
-  lr: 0.001
   base_path: runs
+  optimizer:
+    target: torch.optim.Adam
+    params:
+      lr: 0.0005
+  scheduler:
+    target: torch.optim.lr_scheduler.MultiStepLR
+    params:
+      milestones: [ 2, 5, 10, 15, 25, 40 ]
+      gamma: 0.1
+test:
+  device: cuda:0
