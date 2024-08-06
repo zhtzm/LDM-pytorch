@@ -119,6 +119,9 @@ class DDPM(nn.Module):
         t = torch.randint(self.t_max, size=(x.shape[0],), device=x.device)
         return self.losses(x, t)
 
+    def loss_forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.forward(x)
+
     def predict_x0(self, x_t: torch.Tensor, t: torch.Tensor, noise: torch.Tensor) -> torch.Tensor:
         return (self._extract(self.sqrt_recip_cumprod_alphas, t, x_t.shape) * x_t -
                 self._extract(self.sqrt_recip_cumprod_alphas_m1, t, x_t.shape) * noise)

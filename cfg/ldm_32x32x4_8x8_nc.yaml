@@ -40,10 +40,9 @@ models:
         target: null
         ckpt_file: null
         params: null
-images:
+dataset:
   image_size: 256
   image_channels: 3
-dataset:
   target: datasets.image_dataset.ImageDataset
   params:
     data_dir: E:\datasets\animefaces-konachan
@@ -53,5 +52,13 @@ train:
   use_ema: False
   device: cuda:0
   epochs: 300
-  lr: 0.00005
   base_path: runs
+  optimizer:
+    target: torch.optim.Adam
+    params:
+      lr: 0.0005
+  scheduler:
+    target: torch.optim.lr_scheduler.MultiStepLR
+    params:
+      milestones: [2, 5, 10, 15, 25, 40]
+      gamma: 0.1

@@ -2,7 +2,9 @@ import torch
 from tqdm import tqdm
 
 from models.diffusion.ddpm import DDPM
-from utils.utils import import_class_from_string, disable_train_mode, load_checkpoint
+from utils.initialization_utils import import_class_from_string
+from utils.model_data_utils import disable_train_mode
+from utils.train_test_util import load_checkpoint
 
 
 class LDM(DDPM):
@@ -61,6 +63,9 @@ class LDM(DDPM):
 
         t = torch.randint(self.t_max, size=(x.shape[0],), device=x.device)
         return self.losses(x, condition, t)
+
+    def loss_forward(self, x: torch.Tensor, condition: list = None) -> torch.Tensor:
+        return self.forward(x, condition)
 
     def denoising(self, x_t: torch.Tensor, t: torch.Tensor, condition: torch.Tensor, clip_denoised=True):
         b, *_, device = *x_t.shape, x_t.device

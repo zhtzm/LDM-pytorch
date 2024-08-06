@@ -1,0 +1,40 @@
+models:
+  main_model:
+    target: models.vae.vae.VAE
+    params:
+      embed_dim: 4
+      coder_config:
+        init_channels: 3
+        base_channels: 128
+        final_channels: 4
+        channel_mults: [1, 2, 4]
+        use_attention: []
+        num_res_blocks: 2
+        num_groups: 32
+        dropout: 0.2
+  ema_model:
+    target: null
+    params: null
+dataset:
+  image_size: 128
+  image_channels: 3
+  batch_size: 32
+  train_ratio: 0.8
+  target: datasets.image_dataset.ImageDataset
+  params:
+    data_dir: E:\datasets\animefaces-konachan
+train:
+  device: cuda:0
+  epochs: 50
+  base_path: runs
+  optimizer:
+    target: torch.optim.Adam
+    params:
+      lr: 0.0005
+  scheduler:
+    target: torch.optim.lr_scheduler.MultiStepLR
+    params:
+      milestones: [ 2, 5, 10, 15, 25, 40 ]
+      gamma: 0.1
+test:
+  device: cuda:0
