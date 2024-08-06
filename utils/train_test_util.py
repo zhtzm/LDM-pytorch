@@ -105,14 +105,14 @@ def train_steps(model, ema_model, train_loader, test_loader, optimizer, schedule
             loss = model.loss_forward(x)
 
             acc_train_loss += loss.item()
-            total_samples += loss.size(0)
+            total_samples += x.size(0)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
             if ema_model is not None:
                 ema_model.update(model)
 
-            train_loader_tqdm.set_postfix(loss=loss.item()/loss.size(0), lr=lr)
+            train_loader_tqdm.set_postfix(loss=loss.item()/x.size(0), lr=lr)
 
         acc_train_loss /= total_samples
         losses['train'].append(acc_train_loss)
@@ -128,11 +128,11 @@ def train_steps(model, ema_model, train_loader, test_loader, optimizer, schedule
                 inputs = data.to(device)
                 loss = model(inputs)
                 test_loss += loss.item()
-                total_samples += loss.size(0)
+                total_samples += inputs.size(0)
 
-                test_loader_tqdm.set_postfix(loss=loss.item())
+                test_loader_tqdm.set_postfix(loss=loss.item()/inputs.size(0))
 
-        test_loss /= len(test_loader)
+        test_loss /= total_samples
         losses['test'].append(test_loss)
 
         if epoch % 10 == 0 or epoch == epochs:

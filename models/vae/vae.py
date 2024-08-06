@@ -7,9 +7,12 @@ from models.modules.coder import Encoder, Decoder
 class VAE(nn.Module):
     def __init__(self,
                  coder_config: dict,
-                 embed_dim: int
+                 embed_dim: int,
+                 kl_weight: float
                  ):
         super(VAE, self).__init__()
+        self.register_buffer('kl_weight', torch.Tensor([kl_weight]))
+
         self.encoder = Encoder(**coder_config)
         self.decoder = Decoder(**coder_config)
 
@@ -42,19 +45,18 @@ class VAE(nn.Module):
         recon = self.decode(z)
         return recon, mean, log_var
 
-    @staticmethod
-    def loss_function(x: torch.Tensor,
+    def loss_function(self,
+                      x: torch.Tensor,
                       recon: torch.Tensor,
                       mean: torch.Tensor,
-                      log_var: torch.Tensor,
-                      kl_weight: float
+                      log_var: torch.Tensor
                       ) -> torch.Tensor:
         recon_loss = torch.nn.functional.l1_loss(recon, x, reduction='none')
         recon_loss = torch.sum(recon_loss, dim=[1, 2, 3])
 
         kl_loss = -0.5 * torch.sum(1 + log_var - mean ** 2 - log_var.exp(), dim=[1, 2, 3])
 
-        loss = recon_loss + kl_loss * kl_weight
+        loss = recon_loss + kl_loss * self.kl_weight
         return torch.sum(loss), loss
 
     def loss_forward(self, x: torch.Tensor):
