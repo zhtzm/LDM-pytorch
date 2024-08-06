@@ -50,7 +50,7 @@ def initialize_dataloader(dataset_cfg):
         transforms.Resize((dataset_cfg['image_size'], dataset_cfg['image_size'])),
         transforms.ToTensor()
     ])
-    dataset = dataset_class(transform=transform, **dataset_cfg['params'])
+    dataset = dataset_class(dataset_cfg['data_dir'], transform=transform)
     train_size = int(dataset_cfg['train_ratio'] * len(dataset))
     test_size = len(dataset) - train_size
     train_dataset, test_dataset = random_split(dataset, [train_size, test_size])

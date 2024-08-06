@@ -21,8 +21,7 @@ dataset:
   batch_size: 32
   train_ratio: 0.8
   target: datasets.image_dataset.ImageDataset
-  params:
-    data_dir: E:\datasets\animefaces-konachan
+  data_dir: E:\datasets\animefaces-konachan
 train:
   device: cuda:0
   epochs: 50

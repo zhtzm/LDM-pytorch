@@ -88,7 +88,8 @@ def draw_loss(losses: dict, run_path: str):
 
 def train_steps(model, ema_model, train_loader, test_loader, optimizer, scheduler, epochs, run_path, device):
     model.to(device)
-    ema_model.to(device)
+    if ema_model is not None:
+        ema_model.to(device)
 
     losses = {'train': [], 'test': []}
     best_test_loss = float('inf')
